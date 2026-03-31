@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Internal Marks Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b5d1e, #f1c40f);
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* 🔥 NAVBAR */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .navbar h2 {
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      margin-left: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* 🔥 MAIN TITLE */
+    .main-title {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .sub-title {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      color: #333;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-group button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #27ae60;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-group button:hover {
+      background: #219150;
+    }
+
+    .header {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #27ae60;
+      color: white;
+    }
+
+    td, th {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .summary {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f4f4f4;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🔥 NAVBAR -->
+<div class="navbar">
+  <h2>📊 Internal Marks Management</h2>
+
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</div>
+
+<!-- 🔥 TITLE -->
+<div class="main-title">Internal Marks Management</div>
+<div class="sub-title">Student Performance Analysis</div>
+
+<div class="container">
+  <div class="card">
+
+    <input id="roll" placeholder="Enter Roll Number">
+
+    <!-- BUTTONS -->
+    <div class="btn-group">
+      <button onclick="handleClick('internal1')">📘 Internal 1</button>
+      <button onclick="handleClick('internal2')">📗 Internal 2</button>
+      <button onclick="handleClick('overall')">📊 Overall</button>
+    </div>
+
+    <!-- STUDENT NAME -->
+    <div id="studentHeader" class="header"></div>
+
+    <div id="result"></div>
+
+  </div>
+</div>
+
+<script>
+
+let studentData = null;
+
+function getPerformance(avg) {
+  if (avg >= 80) return ["🌟 Excellent", "green"];
+  if (avg >= 60) return ["👍 Good", "#2ecc71"];
+  if (avg >= 40) return ["⚖️ Average", "orange"];
+  return ["❌ Poor", "red"];
+}
+
+async function handleClick(type) {
+
+  const roll = document.getElementById("roll").value.trim();
+
+  if (!roll) {
+    alert("⚠️ Enter Roll Number first");
+    return;
+  }
+
+  if (!studentData || studentData.rollNo !== roll) {
+    const res = await fetch(`http://localhost:3000/student/${roll}`);
+
+    if (res.status !== 200) {
+      document.getElementById("result").innerHTML = "❌ Student not found";
+      document.getElementById("studentHeader").innerHTML = "";
+      return;
+    }
+
+    studentData = await res.json();
+  }
+
+  document.getElementById("studentHeader").innerHTML =
+    `${studentData.name} (${studentData.rollNo})`;
+
+  if (type === "internal1") renderInternal1();
+  if (type === "internal2") renderInternal2();
+  if (type === "overall") renderOverall();
+}
+
+
+// INTERNAL 1
+function renderInternal1() {
+
+  let total = 0, count = 0;
+
+  let html = `<h3>📘 Internal 1 Performance</h3>
+  <table><tr><th>Subject</th><th>Marks</th></tr>`;
+
+  studentData.semesters.forEach(sem => {
+    sem.subjects.forEach(sub => {
+
+      let i1 = 0;
+
+      sub.internalMarks.forEach(i => {
+        if (i.examType === "internal1") i1 = i.marks;
+      });
+
+      total += i1;
+      count++;
+
+      html += `<tr><td>${sub.subjectName}</td><td>${i1}</td></tr>`;
+    });
+  });
+
+  html += `</table>`;
+
+  const avg = (total / count).toFixed(2);
+  const [msg, color] = getPerformance(avg);
+
+  html += `<div class="summary">
+    Average: ${avg}<br>
+    Performance: <span style="color:${color}">${msg}</span>
+  </div>`;
+
+  document.getElementById("result").innerHTML = html;
+}
+
+
+// INTERNAL 2
+function renderInternal2() {
+
+  let total = 0, count = 0;
+
+  let html = `<h3>📗 Internal 2 Performance</h3>
+  <table><tr><th>Subject</th><th>Marks</th></tr>`;
+
+  studentData.semesters.forEach(sem => {
+    sem.subjects.forEach(sub => {
+
+      let i2 = 0;
+
+      sub.internalMarks.forEach(i => {
+        if (i.examType === "internal2") i2 = i.marks;
+      });
+
+      total += i2;
+      count++;
+
+      html += `<tr><td>${sub.subjectName}</td><td>${i2}</td></tr>`;
+    });
+  });
+
+  html += `</table>`;
+
+  const avg = (total / count).toFixed(2);
+  const [msg, color] = getPerformance(avg);
+
+  html += `<div class="summary">
+    Average: ${avg}<br>
+    Performance: <span style="color:${color}">${msg}</span>
+  </div>`;
+
+  document.getElementById("result").innerHTML = html;
+}
+
+
+// OVERALL
+function renderOverall() {
+
+  let total = 0, count = 0;
+
+  let html = `<h3>📊 Overall Performance</h3>
+  <table><tr><th>Subject</th><th>Total</th></tr>`;
+
+  studentData.semesters.forEach(sem => {
+    sem.subjects.forEach(sub => {
+
+      let i1 = 0, i2 = 0;
+
+      sub.internalMarks.forEach(i => {
+        if (i.examType === "internal1") i1 = i.marks;
+        if (i.examType === "internal2") i2 = i.marks;
+      });
+
+      let sum = i1 + i2;
+
+      total += sum;
+      count++;
+
+      html += `<tr><td>${sub.subjectName}</td><td>${sum}</td></tr>`;
+    });
+  });
+
+  html += `</table>`;
+
+  const avg = (total / count).toFixed(2);
+  const [msg, color] = getPerformance(avg);
+
+  html += `<div class="summary">
+    Average: ${avg}<br>
+    Performance: <span style="color:${color}">${msg}</span>
+  </div>`;
+
+  document.getElementById("result").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>

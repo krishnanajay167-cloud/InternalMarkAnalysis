@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Internal Mark Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b5d1e, #f1c40f);
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* 🔹 Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      margin-left: 25px;
+      text-decoration: none;
+      color: white;
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* 🔹 Hero Section */
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .hero button {
+      padding: 12px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn-add {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-view {
+      background: #2c3e50;
+      color: white;
+    }
+
+    .btn-students {
+      background: #e67e22;
+      color: white;
+    }
+
+    .hero button:hover {
+      transform: scale(1.05);
+      transition: 0.2s;
+    }
+
+    /* 🔹 Features */
+    .section {
+      padding: 40px;
+      text-align: center;
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* 🔹 Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+      background: rgba(0,0,0,0.2);
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- 🔹 Navbar -->
+<div class="navbar">
+  <div class="logo">🎓 Internal Mark Management</div>
+
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</div>
+
+<!-- 🔹 Hero -->
+<div class="hero">
+  <h1>Internal Mark Management & Analysis</h1>
+  <p>Manage student internals, track performance, and analyze results efficiently</p>
+
+  <button class="btn-add" onclick="goToAdd()">➕ Add Marks</button>
+  <button class="btn-view" onclick="goToView()">📊 View Performance</button>
+  <button class="btn-students" onclick="goToStudents()">👨‍🎓 Show Students</button>
+</div>
+
+<!-- 🔹 Features -->
+<div class="section">
+  <h2>🚀 Features</h2>
+
+  <div class="features">
+    <div class="card">
+      <h3>📊 Performance Analysis</h3>
+      <p>Analyze averages and student performance easily.</p>
+    </div>
+
+    <div class="card">
+      <h3>➕ Easy Mark Entry</h3>
+      <p>Enter marks subject by subject with validation.</p>
+    </div>
+
+    <div class="card">
+      <h3>⚡ Smart Filtering</h3>
+      <p>Sort students by performance and semester.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 Footer -->
+<div class="footer">
+  © 2026 | Internal Mark Management System
+</div>
+
+<script>
+
+function goToAdd() {
+  window.location.href = "marks.html";
+}
+
+function goToView() {
+  window.location.href = "perfomance.html";
+}
+
+function goToStudents() {
+  window.location.href = "showstudents.html";
+}
+
+</script>
+
+</body>
+</html>

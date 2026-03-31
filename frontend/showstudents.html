@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Internal Marks Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b5d1e, #f1c40f);
+      color: white;
+    }
+
+    /* 🔥 NAVBAR */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 40px;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .nav-links a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: white;
+    }
+
+    /* 🔥 TITLE */
+    .main-title {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .sub-title {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    .table-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #333;
+    }
+
+    th {
+      background: #27ae60;
+      color: white;
+      padding: 14px;
+      border: 1px solid #ddd;
+    }
+
+    td {
+      padding: 14px;
+      border: 1px solid #eee;
+      text-align: center;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    tr:hover {
+      background: #eafaf1;
+    }
+
+    .message {
+      background: white;
+      color: #333;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🔥 NAVBAR -->
+<div class="navbar">
+  <h2>📊 Internal Marks Management</h2>
+
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</div>
+
+<!-- 🔥 MAIN TITLE -->
+<div class="main-title">Internal Marks Management</div>
+<div class="sub-title">Students Records & Analysis</div>
+
+<div class="container">
+
+  <div class="controls">
+    <div>
+      Semester:
+      <select id="semesterSelect" onchange="renderTable()">
+        <option value="0">Semester 4</option>
+        <option value="1">Semester 5</option>
+        <option value="2">Semester 6</option>
+        <option value="3">Semester 7</option>
+        <option value="4">Semester 8</option>
+      </select>
+    </div>
+
+    <div>
+      Sort:
+      <select id="sortSelect" onchange="renderTable()">
+        <option value="high">High → Low</option>
+        <option value="low">Low → High</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="tableContainer"></div>
+
+</div>
+
+<script>
+
+let studentsData = [];
+
+async function loadStudents() {
+  const res = await fetch("http://localhost:3000/students");
+  studentsData = await res.json();
+  renderTable();
+}
+
+function calculateAvg(sem) {
+  if (!sem || !sem.subjects.length) return 0;
+
+  let total = 0;
+  let count = 0;
+
+  sem.subjects.forEach(sub => {
+    let sum = 0;
+
+    sub.internalMarks.forEach(i => {
+      sum += i.marks;
+    });
+
+    total += sum;
+    count++;
+  });
+
+  return count ? total / count : 0;
+}
+
+function renderTable() {
+  const semIndex = document.getElementById("semesterSelect").value;
+  const sortType = document.getElementById("sortSelect").value;
+
+  const container = document.getElementById("tableContainer");
+
+  if (studentsData.length === 0) {
+    container.innerHTML = "<div class='message'>No students found</div>";
+    return;
+  }
+
+  const semData = studentsData[0].semesters[semIndex];
+
+  if (!semData || semData.subjects.length === 0) {
+    container.innerHTML = "<div class='message'>No subjects for this semester</div>";
+    return;
+  }
+
+  let sorted = [...studentsData];
+
+  sorted.sort((a, b) => {
+    const avgA = calculateAvg(a.semesters[semIndex]);
+    const avgB = calculateAvg(b.semesters[semIndex]);
+
+    return sortType === "high" ? avgB - avgA : avgA - avgB;
+  });
+
+  let headers = `<tr><th>Reg No</th><th>Name</th>`;
+
+  semData.subjects.forEach(sub => {
+    headers += `<th>${sub.subjectName}</th>`;
+  });
+
+  headers += `<th>Avg</th></tr>`;
+
+  let rows = "";
+
+  sorted.forEach(stu => {
+    const sem = stu.semesters[semIndex];
+
+    rows += `<tr>
+      <td>${stu.rollNo}</td>
+      <td>${stu.name}</td>`;
+
+    if (sem && sem.subjects.length > 0) {
+
+      sem.subjects.forEach(sub => {
+        let sum = 0;
+
+        sub.internalMarks.forEach(i => {
+          sum += i.marks;
+        });
+
+        rows += `<td>${sum}</td>`;
+      });
+
+      rows += `<td><b>${calculateAvg(sem).toFixed(1)}</b></td>`;
+    } else {
+      rows += `<td colspan="${semData.subjects.length + 1}">No Data</td>`;
+    }
+
+    rows += `</tr>`;
+  });
+
+  container.innerHTML = `
+    <div class="table-card">
+      <table>
+        ${headers}
+        ${rows}
+      </table>
+    </div>
+  `;
+}
+
+loadStudents();
+
+</script>
+
+</body>
+</html>

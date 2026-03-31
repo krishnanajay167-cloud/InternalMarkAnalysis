@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enter Marks</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0b5d1e, #f1c40f);
+      min-height: 100vh;
+      color: white;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 40px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .nav-links a {
+      margin-left: 20px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      padding: 30px;
+      border-radius: 12px;
+      width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .subject-box {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f9fff9;
+      border-left: 5px solid #27ae60;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .next {
+      background: linear-gradient(135deg, #27ae60, #f1c40f);
+      color: white;
+    }
+
+    .submit {
+      background: #2c3e50;
+      color: white;
+    }
+
+    .progress {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <h2>🎓 Internal Mark Entry</h2>
+  <div class="nav-links">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>Enter Student Marks</h2>
+
+    <label>Name</label>
+    <input id="name" placeholder="Enter student name">
+
+    <label>Roll Number</label>
+    <input id="roll" placeholder="Enter roll number">
+
+    <label>Semester</label>
+    <select id="sem" onchange="startSubjects()">
+      <option value="">Select Semester</option>
+      <option value="4">Semester 4</option>
+      <option value="5">Semester 5</option>
+      <option value="6">Semester 6</option>
+      <option value="7">Semester 7</option>
+      <option value="8">Semester 8</option>
+    </select>
+
+    <div class="progress" id="progress"></div>
+
+    <div id="subjectContainer"></div>
+
+    <button class="btn next" id="nextBtn" onclick="nextSubject()">Next</button>
+    <button class="btn submit" id="submitBtn" onclick="submitData()" style="display:none;">Submit</button>
+
+  </div>
+
+</div>
+
+<script>
+
+let subjectsList = [];
+let currentIndex = 0;
+let collectedSubjects = [];
+
+function startSubjects() {
+  const sem = document.getElementById("sem").value;
+
+  currentIndex = 0;
+  collectedSubjects = [];
+  subjectsList = [];
+
+  if (sem == 4) {
+    subjectsList = [
+      "Advanced Java Programming",
+      "Advanced Database",
+      "Computer Networks",
+      "Probability and Queueing Techniques",
+      "Design and Analysis of Algorithm",
+      "Internet Programming"
+    ];
+  }
+
+  if (subjectsList.length === 0) {
+    document.getElementById("subjectContainer").innerHTML =
+      "<h3>⚠️ Subjects not added yet</h3>";
+    return;
+  }
+
+  showSubject();
+}
+
+
+// 🔥 SHOW SUBJECT
+function showSubject() {
+  const sub = subjectsList[currentIndex];
+
+  document.getElementById("progress").innerText =
+    `Subject ${currentIndex + 1} of ${subjectsList.length}`;
+
+  document.getElementById("subjectContainer").innerHTML = `
+    <div class="subject-box">
+      <h3>${sub}</h3>
+
+      <select id="internalType" onchange="checkInternal()">
+        <option value="internal1">Internal 1</option>
+        <option value="internal2">Internal 2</option>
+      </select>
+
+      <input id="marks" placeholder="Enter Marks">
+    </div>
+  `;
+}
+
+
+// 🔥 CHECK INTERNAL2 CONDITION
+async function checkInternal() {
+  const type = document.getElementById("internalType").value;
+
+  if (type === "internal2") {
+    const roll = document.getElementById("roll").value;
+    const sem = document.getElementById("sem").value;
+    const sub = subjectsList[currentIndex];
+
+    const res = await fetch(
+      `http://localhost:3000/check-internal1/${roll}/${sem}/${sub}`
+    );
+
+    const data = await res.json();
+
+    if (!data.exists) {
+      alert("❌ Enter Internal 1 first");
+      document.getElementById("internalType").value = "internal1";
+    }
+  }
+}
+
+
+// 🔥 NEXT
+function nextSubject() {
+  const sub = subjectsList[currentIndex];
+  const type = document.getElementById("internalType").value;
+  const marks = Number(document.getElementById("marks").value);
+
+  if (!marks && marks !== 0) {
+    alert("Enter marks");
+    return;
+  }
+
+  let subject = collectedSubjects.find(s => s.subjectName === sub);
+
+  if (!subject) {
+    subject = {
+      subjectName: sub,
+      internalMarks: []
+    };
+    collectedSubjects.push(subject);
+  }
+
+  let existing = subject.internalMarks.find(i => i.examType === type);
+
+if (existing) {
+  existing.marks = marks;
+} else {
+  subject.internalMarks.push({
+    examType: type,
+    marks: marks
+  });
+}
+  currentIndex++;
+
+  if (currentIndex < subjectsList.length) {
+    showSubject();
+  } else {
+    document.getElementById("subjectContainer").innerHTML =
+      "<h3>All subjects entered ✅</h3>";
+    document.getElementById("progress").innerText = "";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("submitBtn").style.display = "block";
+  }
+}
+
+
+// 🔥 SUBMIT
+async function submitData() {
+  const name = document.getElementById("name").value;
+  const rollNo = document.getElementById("roll").value;
+  const semester = Number(document.getElementById("sem").value);
+
+  const data = {
+    name,
+    rollNo,
+    semester,
+    subjects: collectedSubjects
+  };
+
+  await fetch("http://localhost:3000/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  alert("Saved Successfully 🎉");
+}
+
+</script>
+
+</body>
+</html>
