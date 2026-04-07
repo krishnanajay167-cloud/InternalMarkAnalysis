@@ -167,7 +167,15 @@ app.get("/students/performance", async (req, res) => {
     res.status(500).send("Error");
   }
 });
-
+// 🔥 GET ALL STUDENTS (REQUIRED)
+app.get("/students", async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (err) {
+    res.status(500).send("Error fetching students");
+  }
+});
 
 app.listen(3000, () => {
   console.log("🚀 Server running on http://localhost:3000");
